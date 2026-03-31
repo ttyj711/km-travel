@@ -1,0 +1,299 @@
+/* ============================================
+   滇藏青环线旅行 - 设计系统
+   Generated: 2026-03-30
+   ============================================ */
+
+/* 颜色变量 */
+:root {
+  /* 主色系 - 天空蓝 */
+  --color-primary: #0EA5E9;
+  --color-primary-light: #38BDF8;
+  --color-primary-dark: #0284C7;
+
+  /* 强调色 - 冒险橙 */
+  --color-cta: #F97316;
+  --color-cta-light: #FB923C;
+  --color-cta-dark: #EA580C;
+
+  /* 背景色 */
+  --color-background: #F0F9FF;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F8FAFC;
+
+  /* 文字颜色 */
+  --color-text: #0C4A6E;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+
+  /* 功能色 */
+  --color-success: #22C55E;
+  --color-warning: #EAB308;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* 边框 */
+  --color-border: #E2E8F0;
+  --color-border-light: #F1F5F9;
+
+  /* 间距系统 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 过渡 */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* 兼容旧变量 */
+  --primary: var(--color-primary);
+  --secondary: var(--color-primary-light);
+  --accent: var(--color-cta);
+  --bg-light: var(--color-background);
+  --text-dark: var(--color-text);
+  --text-light: var(--color-text-muted);
+  --white: var(--color-surface);
+}
+
+/* 全局重置 */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  touch-action: manipulation;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Vant 主题定制 */
+:root:root {
+  --van-primary-color: var(--color-primary);
+  --van-action-bar-background: var(--color-surface);
+  --van-card-background: var(--color-surface);
+  --van-cell-background: var(--color-surface);
+  --van-button-primary-background: var(--color-cta);
+  --van-button-primary-border-color: var(--color-cta);
+  --van-tag-primary-color: var(--color-primary);
+  --van-tag-warning-color: var(--color-cta);
+}
+
+/* 安全区域适配 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .van-action-bar {
+    padding-bottom: calc(var(--van-action-bar-height) + env(safe-area-inset-bottom));
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* 图片懒加载占位 */
+.van-image--loading,
+.van-image--error {
+  background: var(--color-surface-alt);
+}
+
+/* ============================================
+   SVG 图标系统
+   ============================================ */
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+.icon-sm { font-size: 16px; }
+.icon-md { font-size: 20px; }
+.icon-lg { font-size: 24px; }
+.icon-xl { font-size: 32px; }
+
+/* 图标颜色 */
+.icon-primary { color: var(--color-primary); }
+.icon-cta { color: var(--color-cta); }
+.icon-success { color: var(--color-success); }
+.icon-warning { color: var(--color-warning); }
+.icon-muted { color: var(--color-text-muted); }
+
+/* ============================================
+   通用组件样式
+   ============================================ */
+
+/* 区块标题 */
+.section-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 16px;
+  background: var(--color-cta);
+  border-radius: 2px;
+}
+
+/* 卡片容器 */
+.card-container {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.card-container:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* 点击态 */
+.clickable {
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.clickable:active {
+  opacity: 0.85;
+}
+
+/* 玻璃态效果 */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 渐变背景 */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 50%, #7DD3FC 100%);
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* 无障碍：减少动效 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.tag-primary {
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.tag-cta {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--color-cta);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.tag-altitude {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary-dark);
+  backdrop-filter: blur(4px);
+}
+
+/* 响应式断点辅助 */
+@media (max-width: 375px) {
+  html { font-size: 14px; }
+}
+
+@media (min-width: 768px) {
+  html { font-size: 16px; }
+}
