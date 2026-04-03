@@ -1,147 +1,190 @@
-<template>
-  <div class="quick-info">
-    <div class="bento-grid">
-      <div
-        v-for="(item, index) in infoList"
-        :key="item.label"
-        class="bento-card"
-        :style="{ animationDelay: `${index * 80}ms` }"
-      >
-        <div class="bento-icon" :style="{ background: item.bgColor }" v-html="item.icon"></div>
-        <div class="bento-content">
-          <div class="bento-value">{{ item.value }}</div>
-          <div class="bento-label">{{ item.label }}</div>
-        </div>
+﻿<template>
+  <section class="quick-info">
+    <article class="overview-card overview-card-lead surface-card">
+      <div>
+        <span class="card-kicker">Trip Readiness</span>
+        <h3>先判断节奏，而不是先看景点</h3>
+        <p>适合把这条线当成一段穿越式旅行来安排。行程强度受海拔、路况和补给距离共同影响。</p>
       </div>
+      <div class="readiness-meter">
+        <span class="meter-label">综合强度</span>
+        <strong>7 / 10</strong>
+        <div class="meter-bar"><span></span></div>
+      </div>
+    </article>
+
+    <div class="info-grid">
+      <article v-for="item in infoList" :key="item.label" class="info-card surface-card" :class="item.className">
+        <span class="info-label">{{ item.label }}</span>
+        <strong class="info-value">{{ item.value }}</strong>
+        <p class="info-copy">{{ item.copy }}</p>
+      </article>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
 const infoList = [
   {
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8" y1="2" x2="8" y2="6"/>
-      <line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>`,
-    bgColor: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.05) 100%)',
-    label: '最佳时间',
-    value: '5月 / 9-10月'
+    label: '最佳窗口',
+    value: '5月 / 9-10月',
+    copy: '避开雨季风险，也更容易获得清晰能见度。',
+    className: 'tone-sand'
   },
   {
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="10"/>
-      <polyline points="12 6 12 12 16 14"/>
-    </svg>`,
-    bgColor: 'linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%)',
-    label: '行程时长',
-    value: '12-13天'
+    label: '建议车况',
+    value: '四驱优先',
+    copy: '复杂路段和长补给间隔决定了容错空间。',
+    className: 'tone-forest'
   },
   {
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-      <path d="M2 17l10 5 10-5"/>
-      <path d="M2 12l10 5 10-5"/>
-    </svg>`,
-    bgColor: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)',
-    label: '全程距离',
-    value: '约3200km'
-  },
-  {
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
-      <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
-      <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
-      <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
-    </svg>`,
-    bgColor: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%)',
-    label: '最高海拔',
-    value: '5231m'
+    label: '高反关注',
+    value: '纳木错段',
+    copy: '海拔上升快，尽量把日程留得更松。',
+    className: 'tone-sky'
   }
 ]
 </script>
 
 <style scoped>
 .quick-info {
-  margin: var(--space-md);
-}
-
-.bento-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-sm);
+  gap: 14px;
 }
 
-.bento-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  animation: fadeIn 0.4s ease both;
+.overview-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 22px;
 }
 
-.bento-card:active {
-  transform: scale(0.98);
+.overview-card-lead {
+  border-radius: 30px;
 }
 
-.bento-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.bento-icon :deep(svg) {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-}
-
-.bento-card:nth-child(1) .bento-icon { color: var(--color-primary); }
-.bento-card:nth-child(2) .bento-icon { color: var(--color-cta); }
-.bento-card:nth-child(3) .bento-icon { color: var(--color-success); }
-.bento-card:nth-child(4) .bento-icon { color: #A855F7; }
-
-.bento-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.bento-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 2px;
-}
-
-.bento-label {
-  font-size: 0.75rem;
+.card-kicker {
+  display: inline-flex;
+  margin-bottom: 10px;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.overview-card h3 {
+  margin: 0;
+  max-width: 12ch;
+  font-size: 1.45rem;
+  line-height: 1.02;
+  letter-spacing: -0.05em;
 }
 
-@media (max-width: 360px) {
-  .bento-grid {
+.overview-card p {
+  margin: 10px 0 0;
+  max-width: 34ch;
+  color: var(--color-text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+.readiness-meter {
+  min-width: 112px;
+  padding: 16px;
+  align-self: end;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(19, 35, 31, 0.05), rgba(19, 35, 31, 0.02));
+}
+
+.meter-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.readiness-meter strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.meter-bar {
+  height: 8px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: rgba(19, 35, 31, 0.08);
+  overflow: hidden;
+}
+
+.meter-bar span {
+  display: block;
+  width: 70%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-clay));
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.info-card {
+  min-height: 146px;
+  padding: 18px;
+  border-radius: 24px;
+}
+
+.info-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.info-value {
+  display: block;
+  margin-top: 12px;
+  font-size: 1.04rem;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.info-copy {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+.tone-sand {
+  background: linear-gradient(180deg, rgba(255, 247, 236, 0.88), rgba(245, 226, 198, 0.7));
+}
+
+.tone-forest {
+  background: linear-gradient(180deg, rgba(225, 241, 236, 0.92), rgba(203, 228, 220, 0.76));
+}
+
+.tone-sky {
+  background: linear-gradient(180deg, rgba(229, 240, 244, 0.92), rgba(201, 225, 233, 0.76));
+}
+
+@media (max-width: 420px) {
+  .overview-card {
     grid-template-columns: 1fr;
+  }
+
+  .readiness-meter {
+    min-width: unset;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    min-height: unset;
   }
 }
 </style>

@@ -1,23 +1,36 @@
-# Dependencies
+# 浏览器/AI工具本地配置（隐私文件）
+.chrome-profile/
+.edge-profile/
+.claude/
+
+# Git 本地元数据
+.worktrees/
+
+# 依赖包
 node_modules/
 
-# Build output
+# 环境变量（敏感信息）
+.env*
+!.env.example
+
+# 构建产物
 dist/
+*.log
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# 临时文件/截图
+*.png
+!public/*.png  # 如果有项目需要的静态图片，保留这行，否则删除
+*.jpg
+*.jpeg
+*.gif
+
+# 编辑器/IDE 配置
+.vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# OS files
+# 系统文件
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-
-# Environment files
-.env
-.env.local
-.env.*.local

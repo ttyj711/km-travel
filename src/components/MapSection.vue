@@ -1,9 +1,11 @@
-<template>
-  <div class="map-section">
-    <div class="section-header">
-      <h2 class="section-title">路线地图</h2>
-      <div class="header-actions">
-        <span class="node-count">{{ travelData.length }} 个节点</span>
+﻿<template>
+  <section class="map-section surface-card">
+    <div class="section-shell">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">路线地图</h2>
+          <p class="section-copy">用地图把站点密度、首尾呼应和当前位置放到同一个画面里。</p>
+        </div>
         <button class="locate-btn" :class="{ loading: isLocating }" @click="getCurrentLocation" :disabled="isLocating">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/>
@@ -11,52 +13,43 @@
           </svg>
         </button>
       </div>
-    </div>
 
-    <div class="map-wrapper" @touchstart.stop @touchmove.stop @touchend.stop @click.stop>
-      <div id="map-container" ref="mapContainer"></div>
+      <div class="meta-row">
+        <span class="meta-chip">{{ travelData.length }} 个节点</span>
+        <span class="meta-chip">自驾主线</span>
+        <span class="meta-chip" v-if="currentLocation">已定位</span>
+      </div>
 
-      <!-- 定位状态提示 -->
-      <transition name="fade">
-        <div v-if="locationStatus" class="location-toast" :class="locationStatus.type">
-          <svg v-if="locationStatus.type === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          <span>{{ locationStatus.message }}</span>
-        </div>
-      </transition>
+      <div class="map-wrapper" @touchstart.stop @touchmove.stop @touchend.stop @click.stop>
+        <div id="map-container" ref="mapContainer"></div>
 
-      <!-- 图例 -->
-      <div class="map-legend">
-        <div class="legend-item">
-          <span class="legend-dot start"></span>
-          <span>起点</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot end"></span>
-          <span>终点</span>
-        </div>
-        <div class="legend-item" v-if="currentLocation">
-          <span class="legend-dot current"></span>
-          <span>当前位置</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-line"></span>
-          <span>路线</span>
+        <transition name="fade">
+          <div v-if="locationStatus" class="location-toast" :class="locationStatus.type">
+            <span>{{ locationStatus.message }}</span>
+          </div>
+        </transition>
+
+        <div class="map-legend glass-panel">
+          <div class="legend-item">
+            <span class="legend-dot start"></span>
+            <span>起点</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot end"></span>
+            <span>终点</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-line"></span>
+            <span>路线</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, onMounted, defineExpose } from 'vue'
+import { defineExpose, defineEmits, onMounted, ref } from 'vue'
 import AMapLoader from '@amap/amap-jsapi-loader'
 import { travelData } from '../data/travelData'
 
@@ -75,376 +68,290 @@ const initMap = () => {
     key: '07d7cb65523c11741b7652adb393132b',
     version: '2.0',
     plugins: ['AMap.Geolocation']
-  }).then((AMap) => {
-    AMapInstance.value = AMap
-    map.value = new AMap.Map('map-container', {
-      zoom: 6,
-      center: [94.5, 30.5],
-      mapStyle: 'amap://styles/whitesmoke'
-    })
-
-    // 添加标记点
-    travelData.forEach((item, index) => {
-      const marker = new AMap.Marker({
-        position: item.location,
-        title: item.name,
-        content: `<div style="background: #F97316; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; white-space: nowrap; font-weight: 500; box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);">${item.name}</div>`
-      })
-
-      marker.on('click', () => {
-        emit('marker-click', index)
-      })
-      map.value.add(marker)
-    })
-
-    // 绘制路线
-    const path = travelData.map(item => item.location)
-    const polyline = new AMap.Polyline({
-      path: path,
-      strokeColor: '#0EA5E9',
-      strokeWeight: 4,
-      strokeOpacity: 0.8,
-      lineJoin: 'round',
-      lineCap: 'round'
-    })
-    map.value.add(polyline)
-
-    // 起点标记
-    const startMarker = new AMap.Marker({
-      position: travelData[0].location,
-      content: `<div style="background: #22C55E; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 3px solid white; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);">起</div>`
-    })
-    map.value.add(startMarker)
-
-    // 终点标记
-    const endMarker = new AMap.Marker({
-      position: travelData[travelData.length - 1].location,
-      content: `<div style="background: #EF4444; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 3px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);">终</div>`
-    })
-    map.value.add(endMarker)
-
-    map.value.setFitView()
-  }).catch(() => {
-    if (mapContainer.value) {
-      mapContainer.value.innerHTML = `
-        <div style="height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%); color: white; border-radius: 16px;">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 12px; opacity: 0.8;">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
-          </svg>
-          <p style="font-weight: 500;">地图加载中...</p>
-          <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">请检查网络连接</p>
-        </div>
-      `
-    }
   })
+    .then((AMap) => {
+      AMapInstance.value = AMap
+      map.value = new AMap.Map('map-container', {
+        zoom: 6,
+        center: [94.5, 30.5],
+        mapStyle: 'amap://styles/whitesmoke'
+      })
+
+      travelData.forEach((item, index) => {
+        const marker = new AMap.Marker({
+          position: item.location,
+          title: item.name,
+          content: `<div style="background:#153e36;color:#fff7ef;padding:6px 12px;border-radius:999px;font-size:12px;white-space:nowrap;font-weight:600;box-shadow:0 12px 22px rgba(21,62,54,.18);border:1px solid rgba(255,255,255,.16);">${item.name}</div>`
+        })
+
+        marker.on('click', () => emit('marker-click', index))
+        map.value.add(marker)
+      })
+
+      const path = travelData.map((item) => item.location)
+      const polyline = new AMap.Polyline({
+        path,
+        strokeColor: '#c56d3b',
+        strokeWeight: 5,
+        strokeOpacity: 0.9,
+        lineJoin: 'round',
+        lineCap: 'round'
+      })
+      map.value.add(polyline)
+
+      const startMarker = new AMap.Marker({
+        position: travelData[0].location,
+        content: `<div style="background:#3e8f73;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid #fff7ef;box-shadow:0 10px 18px rgba(62,143,115,.28);">起</div>`
+      })
+      map.value.add(startMarker)
+
+      const endMarker = new AMap.Marker({
+        position: travelData[travelData.length - 1].location,
+        content: `<div style="background:#c56d3b;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid #fff7ef;box-shadow:0 10px 18px rgba(197,109,59,.28);">终</div>`
+      })
+      map.value.add(endMarker)
+
+      map.value.setFitView()
+    })
+    .catch(() => {
+      if (mapContainer.value) {
+        mapContainer.value.innerHTML = `
+          <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(135deg,#ece4d8,#d7c9b4);color:#153e36;border-radius:24px;">
+            <p style="margin:0;font-weight:700;">地图加载中断</p>
+            <p style="margin:8px 0 0;font-size:13px;opacity:.72;">请检查网络或高德服务状态</p>
+          </div>
+        `
+      }
+    })
 }
 
-// 获取当前位置
+const getErrorMessage = (code) => {
+  const messages = {
+    1: '定位权限被拒绝，请检查系统设置',
+    2: '当前位置不可用，请稍后重试',
+    3: '定位超时，请切换网络后重试'
+  }
+
+  return messages[code] || '定位失败，请稍后再试'
+}
+
 const getCurrentLocation = () => {
   if (!map.value || !AMapInstance.value) return
 
   isLocating.value = true
-
   const AMap = AMapInstance.value
 
-  // 创建定位标记
   const createLocationMarker = (position) => {
-    // 移除旧标记
     if (currentMarker.value) {
       map.value.remove(currentMarker.value)
     }
 
-    // 创建当前位置标记（蓝色脉冲点）
-    const markerContent = `
-      <div class="location-marker">
-        <div class="location-pulse"></div>
-        <div class="location-dot"></div>
-      </div>
-    `
-
     currentMarker.value = new AMap.Marker({
-      position: position,
-      content: markerContent,
-      offset: new AMap.Pixel(-12, -12)
+      position,
+      content: '<div style="width:18px;height:18px;border-radius:50%;background:#1f6b5b;border:4px solid rgba(255,255,255,.94);box-shadow:0 0 0 8px rgba(31,107,91,.18);"></div>',
+      offset: new AMap.Pixel(-9, -9)
     })
 
     map.value.add(currentMarker.value)
   }
 
-  // 使用浏览器定位
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords
-        const pos = [longitude, latitude]
-
-        currentLocation.value = pos
-        createLocationMarker(pos)
-
-        // 移动地图中心到当前位置
-        map.value.setCenter(pos)
-        map.value.setZoom(8)
-
-        isLocating.value = false
-        locationStatus.value = { type: 'success', message: '定位成功' }
-
-        setTimeout(() => {
-          locationStatus.value = null
-        }, 2000)
-      },
-      (error) => {
-        console.error('定位失败:', error)
-        isLocating.value = false
-        locationStatus.value = { type: 'error', message: getErrorMessage(error.code) }
-
-        setTimeout(() => {
-          locationStatus.value = null
-        }, 3000)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    )
-  } else {
+  if (!navigator.geolocation) {
     isLocating.value = false
-    locationStatus.value = { type: 'error', message: '您的设备不支持定位功能' }
-
-    setTimeout(() => {
-      locationStatus.value = null
-    }, 3000)
+    locationStatus.value = { type: 'error', message: '当前设备不支持定位' }
+    return
   }
-}
 
-// 获取错误信息
-const getErrorMessage = (code) => {
-  const messages = {
-    1: '定位权限被拒绝，请在设置中开启',
-    2: '无法获取位置信息，请检查网络',
-    3: '定位超时，请重试'
-  }
-  return messages[code] || '定位失败，请重试'
-}
-
-const setCenter = (location) => {
-  if (map.value) {
-    map.value.setCenter(location)
-    map.value.setZoom(10)
-  }
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const pos = [position.coords.longitude, position.coords.latitude]
+      currentLocation.value = pos
+      createLocationMarker(pos)
+      map.value.setCenter(pos)
+      map.value.setZoom(8)
+      isLocating.value = false
+      locationStatus.value = { type: 'success', message: '当前位置已同步到地图' }
+      window.setTimeout(() => {
+        locationStatus.value = null
+      }, 2200)
+    },
+    (error) => {
+      isLocating.value = false
+      locationStatus.value = { type: 'error', message: getErrorMessage(error.code) }
+      window.setTimeout(() => {
+        locationStatus.value = null
+      }, 2600)
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  )
 }
 
 onMounted(() => {
   initMap()
 })
 
-defineExpose({ setCenter, getCurrentLocation })
+defineExpose({ getCurrentLocation })
 </script>
 
 <style scoped>
 .map-section {
-  margin: var(--space-md);
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+.section-shell {
+  padding: 18px;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-sm);
+  gap: 16px;
+  align-items: start;
 }
 
-.section-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.node-count {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  background: var(--color-background);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-md);
+.section-copy {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
 }
 
 .locate-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: var(--color-primary);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: rgba(19, 35, 31, 0.04);
+  color: var(--color-forest);
 }
 
 .locate-btn svg {
   width: 18px;
   height: 18px;
-  color: white;
-}
-
-.locate-btn:active {
-  transform: scale(0.95);
 }
 
 .locate-btn.loading svg {
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(19, 35, 31, 0.05);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
 .map-wrapper {
-  background: var(--color-surface);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
   position: relative;
+  margin-top: 16px;
 }
 
 #map-container {
   width: 100%;
-  height: 240px;
+  height: 360px;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(236, 228, 216, 0.9), rgba(210, 196, 174, 0.7));
 }
 
-/* 定位状态提示 */
+.map-legend {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 18px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff7ef;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.legend-dot.start {
+  background: #3e8f73;
+}
+
+.legend-dot.end {
+  background: #c56d3b;
+}
+
+.legend-line {
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: #c56d3b;
+}
+
 .location-toast {
   position: absolute;
-  top: var(--space-sm);
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 500;
-  z-index: 10;
-  box-shadow: var(--shadow-md);
-}
-
-.location-toast svg {
-  width: 14px;
-  height: 14px;
+  min-width: 180px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #fff7ef;
+  backdrop-filter: blur(10px);
 }
 
 .location-toast.success {
-  background: rgba(34, 197, 94, 0.95);
-  color: white;
+  background: rgba(31, 107, 91, 0.92);
 }
 
 .location-toast.error {
-  background: rgba(239, 68, 68, 0.95);
-  color: white;
+  background: rgba(168, 77, 58, 0.92);
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(-10px);
 }
 
-/* 图例 */
-.map-legend {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-lg);
-  padding: var(--space-sm);
-  background: var(--color-background);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: 0.7rem;
-  color: var(--color-text-secondary);
-}
-
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: var(--shadow-sm);
-}
-
-.legend-dot.start {
-  background: var(--color-success);
-}
-
-.legend-dot.end {
-  background: var(--color-error);
-}
-
-.legend-dot.current {
-  background: #3B82F6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-}
-
-.legend-line {
-  width: 16px;
-  height: 3px;
-  background: var(--color-primary);
-  border-radius: 2px;
-}
-</style>
-
-<style>
-/* 当前位置标记样式 - 全局样式 */
-.location-marker {
-  position: relative;
-  width: 24px;
-  height: 24px;
-}
-
-.location-pulse {
-  position: absolute;
-  inset: 0;
-  background: rgba(59, 130, 246, 0.3);
-  border-radius: 50%;
-  animation: locationPulse 2s ease-out infinite;
-}
-
-.location-dot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
-  background: #3B82F6;
-  border: 2px solid white;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
-}
-
-@keyframes locationPulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
+
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
