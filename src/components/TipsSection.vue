@@ -1,24 +1,25 @@
-<template>
-  <div class="tips-section">
-    <div class="section-header">
-      <h2 class="section-title">旅行贴士</h2>
-    </div>
-
-    <div class="tips-grid">
-      <div
-        v-for="(tip, index) in tipsData"
-        :key="tip.title"
-        class="tip-card"
-        :style="{ animationDelay: `${index * 60}ms` }"
-      >
-        <div class="tip-icon" :class="`tip-icon-${index + 1}`" v-html="tip.iconSvg"></div>
-        <div class="tip-content">
-          <h4 class="tip-title">{{ tip.title }}</h4>
-          <p class="tip-desc">{{ tip.desc }}</p>
+﻿<template>
+  <section class="tips-section surface-card">
+    <div class="tips-shell">
+      <div class="tips-header">
+        <div>
+          <h2 class="section-title">行前清单</h2>
+          <p>把原本散落的准备事项重排成更像出发前 briefing 的阅读节奏。</p>
         </div>
       </div>
+
+      <div class="tips-list">
+        <article v-for="(tip, index) in tipsData" :key="tip.title" class="tip-card">
+          <div class="tip-index">{{ String(index + 1).padStart(2, '0') }}</div>
+          <div class="tip-content">
+            <h3>{{ tip.title }}</h3>
+            <p>{{ tip.desc }}</p>
+          </div>
+          <div class="tip-icon" v-html="tip.iconSvg"></div>
+        </article>
+      </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -27,107 +28,77 @@ import { tipsData } from '../data/travelData'
 
 <style scoped>
 .tips-section {
-  margin: var(--space-md);
+  overflow: hidden;
+  border-radius: 30px;
 }
 
-.section-header {
-  margin-bottom: var(--space-sm);
+.tips-shell {
+  padding: 18px;
 }
 
-.section-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text);
+.tips-header p {
+  margin: 10px 0 0;
+  max-width: 32ch;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
 }
 
-.tips-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+.tips-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .tip-card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  box-shadow: var(--shadow-sm);
-  animation: fadeIn 0.35s ease both;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(19, 35, 31, 0.04);
+}
+
+.tip-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: rgba(19, 35, 31, 0.08);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.tip-content h3 {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.15;
+}
+
+.tip-content p {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.58;
+  color: var(--color-text-secondary);
 }
 
 .tip-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(197, 109, 59, 0.14), rgba(215, 166, 66, 0.12));
+  color: var(--color-clay);
 }
 
 .tip-icon :deep(svg) {
   width: 20px;
   height: 20px;
-}
-
-.tip-icon-1 {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.05) 100%);
-  color: var(--color-primary);
-}
-
-.tip-icon-2 {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%);
-  color: var(--color-cta);
-}
-
-.tip-icon-3 {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
-  color: var(--color-success);
-}
-
-.tip-icon-4 {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%);
-  color: #A855F7;
-}
-
-.tip-icon-5 {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
-  color: var(--color-info);
-}
-
-.tip-icon-6 {
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(234, 179, 8, 0.05) 100%);
-  color: var(--color-warning);
-}
-
-.tip-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.tip-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 2px;
-}
-
-.tip-desc {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 </style>

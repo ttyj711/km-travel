@@ -1,65 +1,43 @@
-<template>
-  <div class="travel-cards">
+﻿<template>
+  <section class="travel-cards">
     <div class="cards-header">
-      <div class="header-left">
+      <div>
         <h2 class="section-title">行程节点</h2>
-        <span class="total-badge">{{ travelData.length }} 站</span>
+        <p class="cards-copy">把每一站当作一个独立场景来阅读，减少同质化列表的疲劳感。</p>
       </div>
-      <span class="distance-tag">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tag-icon">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-          <path d="M2 17l10 5 10-5"/>
-        </svg>
-        约 3200km
-      </span>
+      <span class="cards-total">{{ travelData.length }} 站</span>
     </div>
 
     <div class="cards-list">
-      <div
-        v-for="(item, index) in travelData"
-        :key="item.id"
-        class="travel-card"
-        :style="{ animationDelay: `${index * 50}ms` }"
-        @click="$emit('select', index)"
-      >
-        <!-- 天数指示 -->
-        <div class="day-indicator">
-          <span class="day-number">{{ index + 1 }}</span>
+      <article v-for="(item, index) in travelData" :key="item.id" class="journey-entry" :class="`theme-${index % 3}`">
+        <div class="entry-rail">
+          <span class="entry-day">{{ String(index + 1).padStart(2, '0') }}</span>
+          <span class="entry-line"></span>
         </div>
 
-        <!-- 图片 -->
-        <div class="card-image" :style="{ backgroundImage: `url('${item.image}')` }">
-          <div class="image-overlay"></div>
-          <div class="altitude-tag">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="altitude-icon">
-              <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
-              <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
-              <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
-              <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
-            </svg>
-            {{ item.altitude }}
+        <button class="entry-card surface-card" @click="$emit('select', index)">
+          <div class="entry-media" :style="{ backgroundImage: `url('${item.image}')` }">
+            <div class="entry-overlay"></div>
+            <span class="entry-altitude">{{ item.altitude }}</span>
           </div>
-        </div>
 
-        <!-- 内容 -->
-        <div class="card-body">
-          <div class="card-header">
-            <h3 class="card-title">{{ item.name }}</h3>
-            <span class="card-day">{{ item.day }}</span>
-          </div>
-          <p class="card-desc">{{ item.desc.substring(0, 55) }}...</p>
-          <div class="card-tags">
-            <span v-for="tag in item.tags.slice(0, 2)" :key="tag" class="tag">{{ tag }}</span>
-          </div>
-        </div>
+          <div class="entry-body">
+            <div class="entry-topline">
+              <span class="entry-day-text">{{ item.day }}</span>
+              <span class="entry-marker">可展开详情</span>
+            </div>
 
-        <!-- 箭头 -->
-        <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.desc.substring(0, 66) }}...</p>
+
+            <div class="tag-row">
+              <span v-for="tag in item.tags.slice(0, 3)" :key="tag" class="tag-chip">{{ tag }}</span>
+            </div>
+          </div>
+        </button>
+      </article>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -70,223 +48,169 @@ defineEmits(['select'])
 
 <style scoped>
 .travel-cards {
-  padding: var(--space-md);
+  display: grid;
+  gap: 16px;
 }
 
 .cards-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-md);
+  align-items: end;
+  gap: 16px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
+.cards-copy {
+  margin: 10px 0 0;
+  max-width: 30ch;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
 }
 
-.section-title {
-  font-size: 1.1rem;
+.cards-total {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(19, 35, 31, 0.06);
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-text-secondary);
 }
 
-.total-badge {
-  background: var(--color-primary);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px var(--space-sm);
-  border-radius: var(--radius-full);
-}
-
-.distance-tag {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  background: var(--color-background);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-md);
-}
-
-.tag-icon {
-  width: 14px;
-  height: 14px;
-}
-
-/* 卡片列表 */
 .cards-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  display: grid;
+  gap: 14px;
 }
 
-.travel-card {
-  display: flex;
+.journey-entry {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
   align-items: stretch;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
-  animation: slideIn 0.35s ease both;
 }
 
-.travel-card:active {
-  transform: scale(0.98);
-  box-shadow: var(--shadow-md);
+.entry-rail {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
 }
 
-/* 天数指示器 */
-.day-indicator {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--color-primary);
-}
-
-.day-number {
-  position: absolute;
-  left: -4px;
-  top: var(--space-sm);
-  background: var(--color-primary);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  width: 20px;
-  height: 20px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  display: flex;
+.entry-day {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  background: rgba(19, 35, 31, 0.07);
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
-/* 图片 */
-.card-image {
+.entry-line {
+  width: 1px;
+  min-height: calc(100% - 52px);
+  background: linear-gradient(180deg, rgba(19, 35, 31, 0.18), rgba(19, 35, 31, 0));
+}
+
+.entry-card {
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  text-align: left;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.entry-card:active {
+  transform: scale(0.985);
+}
+
+.entry-media {
   position: relative;
-  width: 90px;
-  flex-shrink: 0;
+  height: 146px;
   background-size: cover;
   background-position: center;
 }
 
-.image-overlay {
+.entry-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5));
 }
 
-.altitude-tag {
+.entry-altitude {
   position: absolute;
-  bottom: var(--space-xs);
-  left: var(--space-xs);
-  right: var(--space-xs);
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 250, 244, 0.9);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-forest-deep);
+}
+
+.entry-body {
+  padding: 18px;
+}
+
+.entry-topline {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(4px);
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--color-primary-dark);
-  padding: 2px var(--space-xs);
-  border-radius: var(--radius-sm);
-}
-
-.altitude-icon {
-  width: 10px;
-  height: 10px;
-}
-
-/* 内容 */
-.card-body {
-  flex: 1;
-  padding: var(--space-sm) var(--space-md);
-  padding-left: var(--space-lg);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-xs);
-}
-
-.card-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.card-day {
-  font-size: 0.65rem;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.72rem;
   color: var(--color-text-muted);
-  background: var(--color-background);
-  padding: 1px var(--space-xs);
-  border-radius: var(--radius-sm);
 }
 
-.card-desc {
-  font-size: 0.75rem;
+.entry-marker {
+  color: var(--color-clay);
+  font-weight: 700;
+}
+
+.entry-body h3 {
+  margin: 12px 0 0;
+  font-size: 1.18rem;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.entry-body p {
+  margin: 10px 0 0;
   color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin-bottom: var(--space-xs);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.83rem;
+  line-height: 1.68;
 }
 
-.card-tags {
+.tag-row {
   display: flex;
-  gap: var(--space-xs);
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
 }
 
-.tag {
-  font-size: 0.65rem;
-  color: var(--color-primary);
-  background: rgba(14, 165, 233, 0.1);
-  padding: 1px var(--space-xs);
-  border-radius: var(--radius-sm);
+.tag-chip {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(19, 35, 31, 0.05);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
-/* 箭头 */
-.card-arrow {
-  position: absolute;
-  right: var(--space-sm);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: var(--color-text-muted);
-  opacity: 0;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+.theme-0 .entry-day,
+.theme-0 .entry-marker {
+  color: var(--color-forest);
 }
 
-.travel-card:active .card-arrow {
-  opacity: 1;
-  transform: translateY(-50%) translateX(4px);
+.theme-1 .entry-day,
+.theme-1 .entry-marker {
+  color: var(--color-clay);
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.theme-2 .entry-day,
+.theme-2 .entry-marker {
+  color: var(--color-gold);
 }
 </style>
