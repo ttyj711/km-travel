@@ -49,9 +49,10 @@
 </template>
 
 <script setup>
-import { defineExpose, defineEmits, onMounted, ref } from 'vue'
+import { inject, onMounted, ref, watch } from 'vue'
 import AMapLoader from '@amap/amap-jsapi-loader'
-import { travelData } from '../data/travelData'
+
+const { stops: travelData } = inject('travelStore')
 
 const mapContainer = ref(null)
 const map = ref(null)
@@ -60,14 +61,86 @@ const isLocating = ref(false)
 const currentLocation = ref(null)
 const currentMarker = ref(null)
 const locationStatus = ref(null)
+const routeMarkers = ref([])
+const routePolyline = ref(null)
+const startMarkerRef = ref(null)
+const endMarkerRef = ref(null)
 
 const emit = defineEmits(['marker-click'])
 
+const clearRouteOverlays = () => {
+  if (!map.value) return
+  routeMarkers.value.forEach(m => map.value.remove(m))
+  routeMarkers.value = []
+  if (routePolyline.value) {
+    map.value.remove(routePolyline.value)
+    routePolyline.value = null
+  }
+  if (startMarkerRef.value) {
+    map.value.remove(startMarkerRef.value)
+    startMarkerRef.value = null
+  }
+  if (endMarkerRef.value) {
+    map.value.remove(endMarkerRef.value)
+    endMarkerRef.value = null
+  }
+}
+
+const renderRoute = () => {
+  if (!map.value || !AMapInstance.value) return
+  const AMap = AMapInstance.value
+  const data = travelData.value
+  if (!data || data.length === 0) return
+
+  clearRouteOverlays()
+
+  data.forEach((item, index) => {
+    const marker = new AMap.Marker({
+      position: item.location,
+      title: item.name,
+      content: `<div style="background:#153e36;color:#fff7ef;padding:6px 12px;border-radius:999px;font-size:12px;white-space:nowrap;font-weight:600;box-shadow:0 12px 22px rgba(21,62,54,.18);border:1px solid rgba(255,255,255,.16);">${item.name}</div>`
+    })
+    marker.on('click', () => emit('marker-click', index))
+    map.value.add(marker)
+    routeMarkers.value.push(marker)
+  })
+
+  const path = data.map((item) => item.location)
+  routePolyline.value = new AMap.Polyline({
+    path,
+    strokeColor: '#c56d3b',
+    strokeWeight: 5,
+    strokeOpacity: 0.9,
+    lineJoin: 'round',
+    lineCap: 'round'
+  })
+  map.value.add(routePolyline.value)
+
+  startMarkerRef.value = new AMap.Marker({
+    position: data[0].location,
+    content: `<div style="background:#3e8f73;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid #fff7ef;box-shadow:0 10px 18px rgba(62,143,115,.28);">起</div>`
+  })
+  map.value.add(startMarkerRef.value)
+
+  endMarkerRef.value = new AMap.Marker({
+    position: data[data.length - 1].location,
+    content: `<div style="background:#c56d3b;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid #fff7ef;box-shadow:0 10px 18px rgba(197,109,59,.28);">终</div>`
+  })
+  map.value.add(endMarkerRef.value)
+
+  map.value.setFitView()
+}
+
+watch(travelData, () => {
+  renderRoute()
+}, { deep: true })
+
 const initMap = () => {
+  const apiKey = import.meta.env.VITE_AMAP_KEY || 'YOUR_AMAP_KEY_HERE'
   AMapLoader.load({
-    key: '07d7cb65523c11741b7652adb393132b',
+    key: apiKey,
     version: '2.0',
-    plugins: ['AMap.Geolocation']
+    plugins: ['AMap.Geolocation', 'AMap.PlaceSearch']
   })
     .then((AMap) => {
       AMapInstance.value = AMap
@@ -77,41 +150,7 @@ const initMap = () => {
         mapStyle: 'amap://styles/whitesmoke'
       })
 
-      travelData.forEach((item, index) => {
-        const marker = new AMap.Marker({
-          position: item.location,
-          title: item.name,
-          content: `<div style="background:#153e36;color:#fff7ef;padding:6px 12px;border-radius:999px;font-size:12px;white-space:nowrap;font-weight:600;box-shadow:0 12px 22px rgba(21,62,54,.18);border:1px solid rgba(255,255,255,.16);">${item.name}</div>`
-        })
-
-        marker.on('click', () => emit('marker-click', index))
-        map.value.add(marker)
-      })
-
-      const path = travelData.map((item) => item.location)
-      const polyline = new AMap.Polyline({
-        path,
-        strokeColor: '#c56d3b',
-        strokeWeight: 5,
-        strokeOpacity: 0.9,
-        lineJoin: 'round',
-        lineCap: 'round'
-      })
-      map.value.add(polyline)
-
-      const startMarker = new AMap.Marker({
-        position: travelData[0].location,
-        content: `<div style="background:#3e8f73;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid #fff7ef;box-shadow:0 10px 18px rgba(62,143,115,.28);">起</div>`
-      })
-      map.value.add(startMarker)
-
-      const endMarker = new AMap.Marker({
-        position: travelData[travelData.length - 1].location,
-        content: `<div style="background:#c56d3b;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid #fff7ef;box-shadow:0 10px 18px rgba(197,109,59,.28);">终</div>`
-      })
-      map.value.add(endMarker)
-
-      map.value.setFitView()
+      renderRoute()
     })
     .catch(() => {
       if (mapContainer.value) {
@@ -345,13 +384,4 @@ defineExpose({ getCurrentLocation })
   opacity: 0;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
 </style>

@@ -12,7 +12,7 @@
             <p>把自驾路线、海拔提醒和落脚节点组织成一套更有节奏的旅行界面。</p>
           </div>
           <div class="brand-badge">
-            <span class="badge-value">{{ travelData.length }}</span>
+            <span class="badge-value">{{ stops.length }}</span>
             <span class="badge-label">站点</span>
           </div>
         </div>
@@ -56,6 +56,7 @@
               <HeaderCard />
               <QuickInfo />
               <MapSection ref="mapRef" @marker-click="handleMarkerClick" />
+              <RouteEditor />
             </div>
           </section>
 
@@ -132,7 +133,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, provide, ref } from 'vue'
 import HeaderCard from './components/HeaderCard.vue'
 import QuickInfo from './components/QuickInfo.vue'
 import MapSection from './components/MapSection.vue'
@@ -141,7 +142,12 @@ import TravelCard from './components/TravelCard.vue'
 import TipsSection from './components/TipsSection.vue'
 import DetailPanel from './components/DetailPanel.vue'
 import XiaohongshuSection from './components/XiaohongshuSection.vue'
-import { travelData } from './data/travelData'
+import RouteEditor from './components/RouteEditor.vue'
+import { useTravelStore } from './composables/useTravelStore'
+
+const travelStore = useTravelStore()
+const stops = travelStore.stops
+provide('travelStore', travelStore)
 
 const tabs = [
   {

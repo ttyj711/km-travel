@@ -36,8 +36,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { travelData } from '../data/travelData'
+import { computed, inject } from 'vue'
+
+const { stops: travelData } = inject('travelStore')
 
 const props = defineProps({
   show: { type: Boolean, default: false },
@@ -51,7 +52,13 @@ const visible = computed({
   set: (value) => emit('update:show', value)
 })
 
-const item = computed(() => travelData[props.index])
+const item = computed(() => {
+  const data = travelData.value
+  if (!data || props.index < 0 || props.index >= data.length) {
+    return null
+  }
+  return data[props.index]
+})
 
 const navUrl = computed(() => {
   if (!item.value) return '#'

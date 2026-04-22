@@ -304,13 +304,4 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
 </style>

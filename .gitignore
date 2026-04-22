@@ -1,7 +1,7 @@
 # 浏览器/AI工具本地配置（隐私文件）
 .chrome-profile/
 .edge-profile/
-.claude/
+.claude/*
 
 # Git 本地元数据
 .worktrees/

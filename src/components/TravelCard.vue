@@ -28,7 +28,7 @@
             </div>
 
             <h3>{{ item.name }}</h3>
-            <p>{{ item.desc.substring(0, 66) }}...</p>
+            <p>{{ truncateDesc(item.desc) }}</p>
 
             <div class="tag-row">
               <span v-for="tag in item.tags.slice(0, 3)" :key="tag" class="tag-chip">{{ tag }}</span>
@@ -41,9 +41,20 @@
 </template>
 
 <script setup>
-import { travelData } from '../data/travelData'
+import { computed, inject } from 'vue'
 
-defineEmits(['select'])
+const { stops: travelData } = inject('travelStore')
+const emit = defineEmits(['select'])
+
+const maxLength = computed(() => {
+  const width = typeof window !== 'undefined' ? window.innerWidth : 375
+  return width < 380 ? 50 : 66
+})
+
+const truncateDesc = (desc) => {
+  if (desc.length <= maxLength.value) return desc
+  return desc.substring(0, maxLength.value) + '...'
+}
 </script>
 
 <style scoped>

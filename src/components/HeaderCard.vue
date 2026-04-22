@@ -42,11 +42,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { travelData } from '../data/travelData'
+import { computed, inject } from 'vue'
+
+const { stops: travelData } = inject('travelStore')
 
 const numericAltitudes = computed(() =>
-  travelData
+  travelData.value
     .map((item) => Number.parseInt(item.altitude, 10))
     .filter((value) => Number.isFinite(value))
 )
@@ -59,13 +60,16 @@ const stats = computed(() => [
   { label: '峰值海拔', value: `${highestAltitude.value}m` }
 ])
 
-const routeHighlights = computed(() => [
-  travelData[0],
-  travelData[2],
-  travelData[5],
-  travelData[7],
-  travelData[travelData.length - 1]
-].filter(Boolean))
+const routeHighlights = computed(() => {
+  const data = travelData.value
+  return [
+    data[0],
+    data[2],
+    data[5],
+    data[7],
+    data[data.length - 1]
+  ].filter(Boolean)
+})
 
 const heroBadges = ['自驾主线', '多海拔切换', '适合慢节奏']
 </script>

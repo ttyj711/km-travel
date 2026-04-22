@@ -168,6 +168,15 @@ svg {
   border: 1px solid rgba(19, 35, 31, 0.06);
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
