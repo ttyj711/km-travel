@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  km-travel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: km-travel-app
+    ports:
+      - "8080:80"
+    environment:
+      # 如果需要运行时注入环境变量，可以在这里设置
+      # 注意：Vue 应用是静态构建的，这些变量需要在构建时注入
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # 可选：使用 Caddy 作为反向代理（支持 HTTPS）
+  # caddy:
+  #   image: caddy:alpine
+  #   container_name: km-travel-caddy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  #   depends_on:
+  #     - km-travel
+  #   restart: unless-stopped
+
+# volumes:
+#   caddy_data:
+#   caddy_config:

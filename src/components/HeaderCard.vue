@@ -1,226 +1,284 @@
-<template>
-  <header class="header-card">
-    <!-- 背景装饰 -->
-    <div class="header-bg">
-      <div class="bg-pattern"></div>
-      <div class="bg-gradient"></div>
-    </div>
+﻿<template>
+  <section class="header-card">
+    <div class="hero-copy">
+      <span class="eyebrow">Expedition Edition</span>
+      <h2>把“路线信息”做成真正有旅行气味的首页开场</h2>
+      <p>
+        这条线不是普通打卡清单，而是一段不断切换气候、海拔和地貌的自驾叙事。界面也应该有同样的层次感。
+      </p>
 
-    <!-- 内容 -->
-    <div class="header-content">
-      <div class="route-badge">
-        <svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16l-4-4 4-4"/>
-          <path d="M8 12h8"/>
-        </svg>
-        <span>史诗级自驾路线</span>
-      </div>
-
-      <h1 class="title">
-        <span class="title-main">滇藏青</span>
-        <span class="title-sub">超级环线</span>
-      </h1>
-
-      <p class="subtitle">丙察察 · 墨脱 · 尼屋乡 · 萨普神山</p>
-
-      <!-- 路线简图 -->
-      <div class="route-visual">
-        <div class="route-point start">
-          <span class="point-dot"></span>
-          <span class="point-name">香格里拉</span>
-        </div>
-        <div class="route-line">
-          <div class="line-progress"></div>
-          <div class="waypoint" style="left: 20%">察隅</div>
-          <div class="waypoint" style="left: 40%">墨脱</div>
-          <div class="waypoint" style="left: 60%">拉萨</div>
-          <div class="waypoint" style="left: 80%">那曲</div>
-        </div>
-        <div class="route-point end">
-          <span class="point-name">格尔木</span>
-          <span class="point-dot"></span>
-        </div>
+      <div class="hero-badges">
+        <span v-for="badge in heroBadges" :key="badge" class="hero-badge">{{ badge }}</span>
       </div>
     </div>
-  </header>
+
+    <div class="hero-dossier glass-panel">
+      <div class="dossier-topline">
+        <span>Route Archive</span>
+        <span>{{ travelData.length }} stops</span>
+      </div>
+
+      <div class="hero-stats">
+        <article v-for="stat in stats" :key="stat.label" class="stat-card">
+          <span class="stat-value">{{ stat.value }}</span>
+          <span class="stat-label">{{ stat.label }}</span>
+        </article>
+      </div>
+
+      <div class="route-track">
+        <div class="route-line"></div>
+        <div v-for="(stop, index) in routeHighlights" :key="stop.name" class="route-stop" :style="{ left: `${index * 25}%` }">
+          <span class="stop-dot"></span>
+          <span class="stop-name">{{ stop.name }}</span>
+        </div>
+      </div>
+
+      <div class="route-note">
+        <strong>沿线记忆点</strong>
+        <span>梅里雪山、丙察察、墨脱、拉萨、纳木错</span>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script setup>
+import { computed, inject } from 'vue'
+
+const { stops: travelData } = inject('travelStore')
+
+const numericAltitudes = computed(() =>
+  travelData.value
+    .map((item) => Number.parseInt(item.altitude, 10))
+    .filter((value) => Number.isFinite(value))
+)
+
+const highestAltitude = computed(() => Math.max(...numericAltitudes.value))
+
+const stats = computed(() => [
+  { label: '建议天数', value: '12-13 天' },
+  { label: '路线气质', value: '高原秘境' },
+  { label: '峰值海拔', value: `${highestAltitude.value}m` }
+])
+
+const routeHighlights = computed(() => {
+  const data = travelData.value
+  return [
+    data[0],
+    data[2],
+    data[5],
+    data[7],
+    data[data.length - 1]
+  ].filter(Boolean)
+})
+
+const heroBadges = ['自驾主线', '多海拔切换', '适合慢节奏']
 </script>
 
 <style scoped>
 .header-card {
   position: relative;
   overflow: hidden;
-  margin: 0 !important;
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 34px;
+  background:
+    linear-gradient(135deg, rgba(21, 62, 54, 0.96), rgba(31, 107, 91, 0.9) 56%, rgba(140, 185, 201, 0.74));
+  color: #fff7ef;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 28px 48px rgba(16, 42, 36, 0.22);
 }
 
-/* 背景 */
-.header-bg {
+.header-card::before,
+.header-card::after {
+  content: '';
   position: absolute;
-  inset: 0;
-  overflow: hidden;
+  pointer-events: none;
 }
 
-.bg-pattern {
-  position: absolute;
+.header-card::before {
   inset: 0;
-  background-image:
-    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 26%),
+    linear-gradient(145deg, transparent 0 52%, rgba(255, 255, 255, 0.08) 52% 60%, transparent 60%);
 }
 
-.bg-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 60%, #7DD3FC 100%);
+.header-card::after {
+  right: -48px;
+  bottom: -42px;
+  width: 180px;
+  height: 180px;
+  border-radius: 40% 60% 58% 42%;
+  background: rgba(255, 239, 210, 0.1);
+  filter: blur(4px);
 }
 
-/* 内容 */
-.header-content {
+.hero-copy,
+.hero-dossier {
   position: relative;
   z-index: 1;
-  padding: var(--space-xl) var(--space-lg);
-  padding-top: var(--space-2xl);
 }
 
-/* 徽章 */
-.route-badge {
+.eyebrow {
   display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: white;
-  margin-bottom: var(--space-md);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  margin-bottom: 12px;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 247, 239, 0.72);
 }
 
-.badge-icon {
-  width: 14px;
-  height: 14px;
-}
-
-/* 标题 */
-.title {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-bottom: var(--space-sm);
-}
-
-.title-main {
+.hero-copy h2 {
+  margin: 0;
+  max-width: 12ch;
   font-size: 2rem;
-  font-weight: 800;
-  color: white;
-  letter-spacing: 4px;
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+}
+
+.hero-copy p {
+  margin: 14px 0 0;
+  max-width: 32ch;
+  color: rgba(255, 247, 239, 0.82);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hero-badge {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.hero-dossier {
+  padding: 18px;
+  border-radius: 26px;
+}
+
+.dossier-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 0.72rem;
+  color: rgba(255, 247, 239, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.stat-card {
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.stat-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
   line-height: 1.1;
 }
 
-.title-sub {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 2px;
+.stat-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: rgba(255, 247, 239, 0.72);
 }
 
-.subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: var(--space-lg);
-  letter-spacing: 1px;
-}
-
-/* 路线可视化 */
-.route-visual {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.route-point {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  flex-shrink: 0;
-}
-
-.point-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: white;
-}
-
-.route-point.start .point-dot {
-  background: #22C55E;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
-}
-
-.route-point.end .point-dot {
-  background: #EF4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
-}
-
-.point-name {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: white;
+.route-track {
+  position: relative;
+  margin-top: 20px;
+  padding-top: 24px;
+  min-height: 62px;
 }
 
 .route-line {
-  flex: 1;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.3);
-  position: relative;
-  border-radius: 1px;
-}
-
-.line-progress {
   position: absolute;
+  top: 8px;
   left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.4));
+}
+
+.route-stop {
+  position: absolute;
   top: 0;
-  height: 100%;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 1px;
-}
-
-.waypoint {
-  position: absolute;
-  top: 6px;
   transform: translateX(-50%);
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.7);
-  white-space: nowrap;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
 }
 
-.waypoint::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
+.stop-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #fff7ef;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.08);
 }
 
-@media (max-width: 360px) {
-  .waypoint {
+.stop-name {
+  max-width: 58px;
+  text-align: center;
+  font-size: 0.66rem;
+  color: rgba(255, 247, 239, 0.72);
+  line-height: 1.25;
+}
+
+.route-note {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.78rem;
+}
+
+.route-note strong {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 247, 239, 0.72);
+}
+
+.route-note span {
+  color: rgba(255, 247, 239, 0.88);
+  line-height: 1.5;
+}
+
+@media (max-width: 380px) {
+  .header-card {
+    padding: 20px;
+  }
+
+  .hero-copy h2 {
+    font-size: 1.75rem;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .route-track {
     display: none;
   }
 }

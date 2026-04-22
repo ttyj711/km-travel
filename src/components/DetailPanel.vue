@@ -1,60 +1,34 @@
-<template>
-  <van-popup
-    v-model:show="visible"
-    position="bottom"
-    round
-    closeable
-    :style="{ height: '75%' }"
-  >
-    <div class="detail-panel" v-if="item">
-      <!-- 图片 -->
+﻿<template>
+  <van-popup v-model:show="visible" position="bottom" round closeable :style="{ height: '78%' }">
+    <div v-if="item" class="detail-panel">
       <div class="panel-hero">
         <img class="hero-image" :src="item.image" :alt="item.name" />
         <div class="hero-overlay">
-          <div class="hero-day">{{ item.day }}</div>
-          <div class="hero-altitude">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
-              <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
-              <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
-              <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
-            </svg>
-            {{ item.altitude }}
-          </div>
+          <span class="hero-day">{{ item.day }}</span>
+          <span class="hero-altitude">{{ item.altitude }}</span>
         </div>
       </div>
 
-      <!-- 内容 -->
       <div class="panel-body">
-        <h2 class="panel-title">{{ item.name }}</h2>
-
+        <span class="panel-kicker">Route Dossier</span>
+        <h2>{{ item.name }}</h2>
         <p class="panel-desc">{{ item.desc }}</p>
 
-        <!-- 标签 -->
         <div class="panel-tags">
           <span v-for="tag in item.tags" :key="tag" class="tag">{{ tag }}</span>
         </div>
 
-        <!-- 提示卡片 -->
-        <div class="tips-card">
-          <div class="tips-header">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4"/>
-              <path d="M12 8h.01"/>
-            </svg>
-            <span>旅行提示</span>
-          </div>
-          <p class="tips-text">{{ item.tips }}</p>
-        </div>
+        <article class="panel-note panel-note-primary">
+          <span class="note-label">旅行提示</span>
+          <p>{{ item.tips }}</p>
+        </article>
 
-        <!-- 导航按钮 -->
         <button class="nav-btn" @click="openNav">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
             <circle cx="12" cy="10" r="3"/>
           </svg>
-          打开高德地图导航
+          在高德中导航到这里
         </button>
       </div>
     </div>
@@ -62,8 +36,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { travelData } from '../data/travelData'
+import { computed, inject } from 'vue'
+
+const { stops: travelData } = inject('travelStore')
 
 const props = defineProps({
   show: { type: Boolean, default: false },
@@ -72,13 +47,18 @@ const props = defineProps({
 
 const emit = defineEmits(['update:show'])
 
-// 使用 computed 实现 v-model
 const visible = computed({
   get: () => props.show,
-  set: (val) => emit('update:show', val)
+  set: (value) => emit('update:show', value)
 })
 
-const item = computed(() => travelData[props.index])
+const item = computed(() => {
+  const data = travelData.value
+  if (!data || props.index < 0 || props.index >= data.length) {
+    return null
+  }
+  return data[props.index]
+})
 
 const navUrl = computed(() => {
   if (!item.value) return '#'
@@ -96,10 +76,9 @@ const openNav = () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background: #fffaf3;
 }
 
-/* Hero 图片 */
 .panel-hero {
   position: relative;
   flex-shrink: 0;
@@ -107,138 +86,117 @@ const openNav = () => {
 
 .hero-image {
   width: 100%;
-  height: 200px;
+  height: 228px;
   object-fit: cover;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, transparent 30%, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: var(--space-md);
+  align-items: start;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.34), transparent 36%, rgba(0, 0, 0, 0.46));
 }
 
-.hero-day {
-  background: var(--color-cta);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-}
-
+.hero-day,
 .hero-altitude {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  color: var(--color-primary-dark);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 250, 244, 0.92);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--color-forest-deep);
 }
 
-.hero-altitude svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* 内容 */
 .panel-body {
   flex: 1;
-  padding: var(--space-lg);
   overflow-y: auto;
+  padding: 22px;
 }
 
-.panel-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: var(--space-md);
+.panel-kicker {
+  display: inline-flex;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.panel-body h2 {
+  margin: 12px 0 0;
+  font-size: 1.7rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 
 .panel-desc {
-  font-size: 0.95rem;
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.72;
   color: var(--color-text-secondary);
-  line-height: 1.7;
-  margin-bottom: var(--space-lg);
 }
 
 .panel-tags {
   display: flex;
-  gap: var(--space-sm);
   flex-wrap: wrap;
-  margin-bottom: var(--space-lg);
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .tag {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--color-primary);
-  background: rgba(14, 165, 233, 0.1);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-md);
-}
-
-/* 提示卡片 */
-.tips-card {
-  background: linear-gradient(135deg, var(--color-background) 0%, rgba(14, 165, 233, 0.05) 100%);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  margin-bottom: var(--space-lg);
-}
-
-.tips-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(19, 35, 31, 0.05);
+  font-size: 0.76rem;
   font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: var(--space-sm);
-}
-
-.tips-header svg {
-  width: 18px;
-  height: 18px;
-}
-
-.tips-text {
-  font-size: 0.85rem;
   color: var(--color-text-secondary);
-  line-height: 1.6;
 }
 
-/* 导航按钮 */
+.panel-note {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 24px;
+}
+
+.panel-note-primary {
+  background: linear-gradient(180deg, rgba(230, 240, 236, 0.92), rgba(207, 227, 220, 0.72));
+}
+
+.note-label {
+  display: inline-flex;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.panel-note p {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.68;
+  color: var(--color-text-secondary);
+}
+
 .nav-btn {
-  display: flex;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #c56d3b, #a8542a);
+  color: #fff8f2;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  width: 100%;
-  padding: var(--space-md);
-  background: var(--color-cta);
-  color: white;
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  gap: 10px;
 }
 
 .nav-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-.nav-btn:active {
-  background: var(--color-cta-dark);
-  transform: scale(0.98);
+  width: 18px;
+  height: 18px;
 }
 </style>
